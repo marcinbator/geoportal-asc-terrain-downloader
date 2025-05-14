@@ -1,0 +1,5 @@
+requests~=2.32.3
+pyproj~=3.7.1
+tqdm~=4.67.1
+numpy~=2.2.5
+imageio~=2.37.0
