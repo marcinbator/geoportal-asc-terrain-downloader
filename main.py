@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from src.convert import convert_asc_to_tiff
 from src.download_asc import download_asc
 
@@ -5,14 +8,21 @@ asc_directory = "out/tatry_asc_tiles"
 download = False
 
 if __name__ == "__main__":
+    top_left_bottom_right_coords = [
+        (49.261330, 19.911765),
+        (49.226664, 19.994461)
+    ]
+
     if download:
+        shutil.rmtree(asc_directory)
+        os.makedirs(asc_directory)
         download_asc(
             output_dir=asc_directory,
             coords_wgs84=[
-                (49.29055, 19.70717),
-                (49.30040, 20.23310),
-                (49.13985, 20.23447),
-                (49.14883, 19.72639)
+                top_left_bottom_right_coords[0],
+                (top_left_bottom_right_coords[0][0], top_left_bottom_right_coords[1][1]),
+                top_left_bottom_right_coords[1],
+                (top_left_bottom_right_coords[1][0], top_left_bottom_right_coords[0][1])
             ]
         )
 
