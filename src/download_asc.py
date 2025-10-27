@@ -1,15 +1,18 @@
-import os
 import math
+import os
 import re
+import shutil
 
 import requests
 from pyproj import Transformer
 from tqdm import tqdm
 
-from src.var import GEOPORTAL_URL
 
+def download_asc(output_dir: str, geoportal_url: str, coords_wgs84: list[tuple[float, float]], clear_dirs=False):
+    if clear_dirs:
+        shutil.rmtree(output_dir)
+        os.makedirs(output_dir)
 
-def download_asc(output_dir: str, coords_wgs84: list[tuple[float, float]]):
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:2180", always_xy=True)
     coords_2180 = [transformer.transform(lon, lat) for lat, lon in coords_wgs84]
 
@@ -22,7 +25,7 @@ def download_asc(output_dir: str, coords_wgs84: list[tuple[float, float]]):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    url_template = GEOPORTAL_URL
+    url_template = geoportal_url
     params_template = {
         "service": "wcs",
         "request": "GetCoverage",
@@ -57,7 +60,7 @@ def download_asc(output_dir: str, coords_wgs84: list[tuple[float, float]]):
                     with open(filename, "wb") as f:
                         f.write(response.content)
 
-                    fix_asc(filename)
+                    fix_header(filename)
 
                 except Exception as e:
                     print(f"Downloading error: {bbox}: {e}")
@@ -67,7 +70,7 @@ def download_asc(output_dir: str, coords_wgs84: list[tuple[float, float]]):
             x += tile_size_meters
 
 
-def fix_asc(filename):
+def fix_header(filename):
     with open(filename, "r", encoding="utf-8") as f:
         lines = f.readlines()
 

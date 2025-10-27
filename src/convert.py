@@ -1,7 +1,25 @@
 import os
 import re
-import numpy as np
+
 import imageio.v3 as iio
+import numpy as np
+
+
+def convert_asc_to_tiff(asc_dir: str, output_filename: str, output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+
+    merged_data, header = merge_asc_tiles(asc_dir)
+
+    asc_path = os.path.join(output_dir, output_filename +".asc")
+    save_asc(asc_path, merged_data, header)
+    print(f"Saved merged ASC: {asc_path}")
+
+    tiff_path = os.path.join(output_dir, output_filename + ".tiff")
+    save_tiff(tiff_path, merged_data)
+    print(f"Saved TIFF: {tiff_path}")
+
+
+#
 
 
 def read_asc_header(path):
@@ -35,7 +53,7 @@ def find_tiles(asc_dir):
     return tiles
 
 
-def merge_asc_tiles(asc_dir, res=1.0):
+def merge_asc_tiles(asc_dir):
     tiles = find_tiles(asc_dir)
     positions = []
 
@@ -124,17 +142,3 @@ def save_tiff(path, data):
     max_val = np.max(data)
     normalized = ((data - min_val) / (max_val - min_val) * 65535).astype(np.uint16)
     iio.imwrite(path, normalized, extension=".tiff")
-
-
-def convert_asc_to_tiff(asc_dir: str, output_filename: str, output_dir="out/tiff"):
-    os.makedirs(output_dir, exist_ok=True)
-
-    merged_data, header = merge_asc_tiles(asc_dir, res=1.0)
-
-    asc_path = os.path.join(output_dir, output_filename.replace(".tiff", ".asc"))
-    save_asc(asc_path, merged_data, header)
-    print(f"Saved merged ASC: {asc_path}")
-
-    tiff_path = os.path.join(output_dir, output_filename)
-    save_tiff(tiff_path, merged_data)
-    print(f"Saved TIFF: {tiff_path}")
